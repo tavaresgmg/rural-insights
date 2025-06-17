@@ -10,7 +10,7 @@ import {
   OptimizedFinancialHealthScore,
   OptimizedScenarioSimulator,
   OptimizedInsightTimeline,
-  OptimizedExportButtons
+  OptimizedEnhancedExportButtons
 } from '../components/LazyComponents';
 import type { AnalysisResponse } from '../services/api';
 
@@ -27,7 +27,7 @@ export const Dashboard: React.FC = () => {
   useEffect(() => {
     // Recupera dados da análise do sessionStorage
     const storedData = sessionStorage.getItem('analysisData');
-    const processingTime = sessionStorage.getItem('processingTime');
+    // const processingTime = sessionStorage.getItem('processingTime');
     
     if (!storedData) {
       navigate('/');
@@ -48,7 +48,7 @@ export const Dashboard: React.FC = () => {
     }
   }, [navigate]);
 
-  const fetchScoreData = async (analysisData: any) => {
+  const fetchScoreData = async (analysisData: AnalysisResponse) => {
     try {
       const response = await fetch('http://localhost:8000/api/insights/financial-health-score', {
         method: 'POST',
@@ -92,7 +92,7 @@ export const Dashboard: React.FC = () => {
   const lineData: any[] = [];
   const months = new Set<string>();
   
-  Object.entries(analysis.evolucao_mensal).forEach(([categoria, evolucao]) => {
+  Object.entries(analysis.evolucao_mensal).forEach(([_categoria, evolucao]) => {
     evolucao.forEach(item => {
       months.add(item.mes);
     });
@@ -256,7 +256,7 @@ export const Dashboard: React.FC = () => {
                       formatter={(value: any) => `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
                     />
                     <Bar dataKey="valor" fill="#10B981" radius={[8, 8, 0, 0]}>
-                      {barData.map((entry, index) => (
+                      {barData.map((_entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Bar>
@@ -301,7 +301,7 @@ export const Dashboard: React.FC = () => {
                       fill="#8884d8"
                       dataKey="value"
                     >
-                      {pieData.map((entry, index) => (
+                      {pieData.map((_entry, index) => (
                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                       ))}
                     </Pie>
@@ -328,10 +328,15 @@ export const Dashboard: React.FC = () => {
         </motion.div>
       </main>
 
-      {/* Botões de Exportação Flutuantes */}
-      <OptimizedExportButtons 
+      {/* Botões de Exportação Flutuantes Aprimorados */}
+      <OptimizedEnhancedExportButtons 
         analysisData={analysis} 
         scoreData={scoreData} 
+        customization={{
+          companyName: 'Rural Insights',
+          primaryColor: '#10B981',
+          secondaryColor: '#F59E0B'
+        }}
       />
     </div>
   );

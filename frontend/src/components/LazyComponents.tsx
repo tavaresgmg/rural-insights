@@ -26,6 +26,12 @@ const LazyExportButtons = React.lazy(() =>
   }))
 );
 
+const LazyEnhancedExportButtons = React.lazy(() => 
+  import('./EnhancedExportButtons').then(module => ({ 
+    default: module.EnhancedExportButtons 
+  }))
+);
+
 // Componente de loading avançado
 const ComponentSkeleton: React.FC<{ 
   height?: string; 
@@ -276,6 +282,26 @@ export const OptimizedExportButtons: React.FC<{ analysisData?: any; scoreData?: 
   </LazyErrorBoundary>
 );
 
+export const OptimizedEnhancedExportButtons: React.FC<{ 
+  analysisData?: any; 
+  scoreData?: any;
+  customization?: any;
+}> = ({ 
+  analysisData, 
+  scoreData,
+  customization
+}) => (
+  <LazyErrorBoundary>
+    <Suspense fallback={<div></div>}>
+      <LazyEnhancedExportButtons 
+        analysisData={analysisData} 
+        scoreData={scoreData} 
+        customization={customization}
+      />
+    </Suspense>
+  </LazyErrorBoundary>
+);
+
 // Hook para prefetch de componentes
 export const usePrefetchComponents = () => {
   React.useEffect(() => {
@@ -285,6 +311,7 @@ export const usePrefetchComponents = () => {
       import('./ScenarioSimulator');
       import('./InsightTimeline');
       import('./ExportButtons');
+      import('./EnhancedExportButtons');
     }, 2000);
 
     return () => clearTimeout(prefetchTimer);

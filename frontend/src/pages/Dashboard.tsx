@@ -77,7 +77,8 @@ export const Dashboard: React.FC = () => {
 
   // Prepara dados para os gráficos
   const barData = analysis.top_categorias.map(cat => ({
-    name: cat.nome.length > 20 ? cat.nome.substring(0, 20) + '...' : cat.nome,
+    name: cat.nome.length > 30 ? cat.nome.substring(0, 30) + '...' : cat.nome,
+    fullName: cat.nome,
     valor: cat.valor,
     percentual: cat.percentual
   }));
@@ -248,12 +249,42 @@ export const Dashboard: React.FC = () => {
             <div className="h-80">
               {activeTab === 'bar' && (
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={barData} layout="horizontal">
+                  <BarChart data={barData} layout="horizontal" margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" angle={-45} textAnchor="end" height={100} />
-                    <YAxis />
+                    <XAxis 
+                      dataKey="name" 
+                      angle={-45} 
+                      textAnchor="end" 
+                      height={120}
+                      interval={0}
+                      tick={{ fontSize: 10 }}
+                      width={100}
+                    />
+                    <YAxis 
+                      tickFormatter={(value) => {
+                        if (value >= 1000000) {
+                          return `${(value / 1000000).toFixed(1)}M`;
+                        } else if (value >= 1000) {
+                          return `${(value / 1000).toFixed(0)}k`;
+                        }
+                        return value.toString();
+                      }}
+                      width={80}
+                    />
                     <Tooltip 
-                      formatter={(value: any) => `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
+                      content={({ active, payload }: any) => {
+                        if (active && payload && payload.length) {
+                          const data = payload[0].payload;
+                          return (
+                            <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-200 max-w-xs">
+                              <p className="font-semibold text-gray-800 mb-1 text-sm break-words">{data.fullName || data.name}</p>
+                              <p className="text-sm text-gray-600">Valor: R$ {data.valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                              <p className="text-sm text-gray-600">Percentual: {data.percentual}%</p>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
                     />
                     <Bar dataKey="valor" fill="#10B981" radius={[8, 8, 0, 0]}>
                       {barData.map((_entry, index) => (
@@ -266,10 +297,20 @@ export const Dashboard: React.FC = () => {
 
               {activeTab === 'line' && lineData.length > 0 && (
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={lineData}>
+                  <LineChart data={lineData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="mes" />
-                    <YAxis />
+                    <YAxis 
+                      tickFormatter={(value) => {
+                        if (value >= 1000000) {
+                          return `${(value / 1000000).toFixed(1)}M`;
+                        } else if (value >= 1000) {
+                          return `${(value / 1000).toFixed(0)}k`;
+                        }
+                        return value.toString();
+                      }}
+                      width={80}
+                    />
                     <Tooltip 
                       formatter={(value: any) => `R$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`}
                     />
@@ -290,14 +331,14 @@ export const Dashboard: React.FC = () => {
 
               {activeTab === 'pie' && (
                 <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
+                  <PieChart margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
                     <Pie
                       data={pieData}
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={(entry) => `${entry.name}: ${entry.percentual}%`}
-                      outerRadius={100}
+                      label={(entry) => entry.percentual > 5 ? `${entry.name}: ${entry.percentual}%` : ''}
+                      outerRadius={90}
                       fill="#8884d8"
                       dataKey="value"
                     >

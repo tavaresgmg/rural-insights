@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PDFSafeExportService, type EnhancedExportData, type WhatsAppOptions } from '../services/pdf-safe-export.service';
-import { EnhancedExportService } from '../services/enhanced-export.service';
 
 interface EnhancedExportButtonsProps {
   analysisData?: any;

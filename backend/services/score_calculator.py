@@ -3,6 +3,9 @@ import numpy as np
 from typing import Dict, List, Optional, Tuple
 from datetime import datetime, timedelta
 import math
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class FinancialHealthScoreCalculator:
@@ -122,16 +125,22 @@ class FinancialHealthScoreCalculator:
     def _calculate_monthly_expenses(self, data: Dict) -> float:
         """Calcula gastos mensais médios"""
         try:
-            categories = data.get('top_categories', [])
+            # Suporta ambos os formatos de dados
+            categories = data.get('top_categories', data.get('top_categorias', []))
             total_expenses = sum(cat.get('valor', 0) for cat in categories)
             
             # Estima período baseado na variação mensal
-            monthly_data = data.get('monthly_evolution', [])
-            months_count = len(monthly_data) if monthly_data else 1
+            monthly_data = data.get('monthly_evolution', data.get('evolucao_mensal', {}))
+            if isinstance(monthly_data, dict):
+                # Se for dict, conta quantas categorias têm dados mensais
+                months_count = max(len(evolution) for evolution in monthly_data.values()) if monthly_data else 1
+            else:
+                months_count = len(monthly_data) if monthly_data else 1
             
             return total_expenses / max(months_count, 1)
-        except:
-            return 1000.0  # Valor padrão para evitar divisão por zero
+        except Exception as e:
+            logger.error(f"Erro ao calcular gastos mensais: {e}")
+            return 10000.0  # Valor padrão mais realista para produtores rurais
     
     def _estimate_annual_revenue(self, data: Dict) -> float:
         """Estima receita anual baseada nos gastos (heurística rural)"""
@@ -158,12 +167,17 @@ class FinancialHealthScoreCalculator:
     
     def _calculate_debts(self, data: Dict) -> float:
         """Calcula total de dívidas baseado em categorias de financiamento"""
-        categories = data.get('top_categories', [])
+        categories = data.get('top_categories', data.get('top_categorias', []))
         debt_keywords = ['financiamento', 'empréstimo', 'credito', 'parcelamento', 'juros']
         
         debt_total = 0
         for category in categories:
-            desc = category.get('categoria', '').lower()
+            # Verifica se category é um dicionário
+            if not isinstance(category, dict):
+                continue
+                
+            # Suporta ambos os formatos: 'categoria' e 'nome'
+            desc = category.get('categoria', category.get('nome', '')).lower()
             if any(keyword in desc for keyword in debt_keywords):
                 debt_total += category.get('valor', 0)
         
@@ -206,19 +220,27 @@ class FinancialHealthScoreCalculator:
     
     def _calculate_efficiency_score(self, data: Dict) -> float:
         """Score de eficiência baseado em ROI e gestão de categorias"""
-        categories = data.get('top_categories', [])
-        monthly_data = data.get('monthly_evolution', [])
+        categories = data.get('top_categories', data.get('top_categorias', []))
+        monthly_data = data.get('monthly_evolution', data.get('evolucao_mensal', {}))
         
         # Analisa eficiência por diversificação de gastos
         diversification_score = min(len(categories), 10) * 5  # Max 50 pontos
         
         # Analisa consistência mensal (menor variação = maior eficiência)
-        if len(monthly_data) >= 3:
-            values = [month.get('valor', 0) for month in monthly_data]
-            cv = np.std(values) / max(np.mean(values), 1)  # Coeficiente de variação
-            consistency_score = max(0, 50 - (cv * 100))  # Max 50 pontos
-        else:
-            consistency_score = 30  # Score neutro
+        consistency_score = 30  # Score neutro padrão
+        
+        # Se monthly_data for um dicionário com dados por categoria
+        if isinstance(monthly_data, dict) and monthly_data:
+            all_values = []
+            for cat_data in monthly_data.values():
+                if isinstance(cat_data, list):
+                    for month in cat_data:
+                        if isinstance(month, dict):
+                            all_values.append(month.get('valor', 0))
+            
+            if len(all_values) >= 3:
+                cv = np.std(all_values) / max(np.mean(all_values), 1)  # Coeficiente de variação
+                consistency_score = max(0, 50 - (cv * 100))  # Max 50 pontos
         
         total_efficiency = diversification_score + consistency_score
         return min(100, total_efficiency)
@@ -343,13 +365,27 @@ class FinancialHealthScoreCalculator:
     
     def _calculate_trend(self, data: Dict) -> Dict:
         """Calcula tendência baseada nos dados históricos"""
-        monthly_data = data.get('monthly_evolution', [])
+        monthly_data = data.get('monthly_evolution', data.get('evolucao_mensal', {}))
         
-        if len(monthly_data) < 3:
+        # Coleta todos os valores mensais
+        all_monthly_values = []
+        
+        if isinstance(monthly_data, dict):
+            for cat_data in monthly_data.values():
+                if isinstance(cat_data, list):
+                    for month in cat_data:
+                        if isinstance(month, dict):
+                            all_monthly_values.append(month.get('valor', 0))
+        elif isinstance(monthly_data, list):
+            for month in monthly_data:
+                if isinstance(month, dict):
+                    all_monthly_values.append(month.get('valor', 0))
+        
+        if len(all_monthly_values) < 3:
             return {'direcao': 'estavel', 'variacao': 0}
         
-        # Analisa últimos 3 meses
-        recent_values = [month.get('valor', 0) for month in monthly_data[-3:]]
+        # Analisa últimos 3 valores
+        recent_values = all_monthly_values[-3:]
         
         if len(recent_values) >= 2:
             trend = (recent_values[-1] - recent_values[0]) / max(recent_values[0], 1) * 100

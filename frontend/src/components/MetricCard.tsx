@@ -56,11 +56,11 @@ export const MetricCard: React.FC<MetricCardProps> = ({
           )}
         </div>
         
-        <h3 className="text-sm font-medium text-gray-600 mb-1">{title}</h3>
-        <p className="text-2xl font-bold text-gray-900 mb-1">{value}</p>
+        <h3 className="text-sm font-medium text-gray-600 mb-1 truncate">{title}</h3>
+        <p className="text-xl sm:text-2xl font-bold text-gray-900 mb-1 break-words">{value}</p>
         
         {subtitle && (
-          <p className="text-sm text-gray-500">{subtitle}</p>
+          <p className="text-sm text-gray-500 truncate-2">{subtitle}</p>
         )}
       </div>
     </motion.div>

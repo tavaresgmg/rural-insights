@@ -219,6 +219,12 @@ class LazyErrorBoundary extends React.Component<
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     console.error('Lazy component error:', error, errorInfo);
+    // Try to recover by retrying once
+    if (!this.state.hasError) {
+      setTimeout(() => {
+        this.setState({ hasError: false });
+      }, 1000);
+    }
   }
 
   render() {
@@ -230,7 +236,7 @@ class LazyErrorBoundary extends React.Component<
             Erro ao carregar componente
           </h3>
           <p className="text-red-600 text-sm mb-4">
-            Ocorreu um erro inesperado. Tente recarregar a página.
+            {this.state.error?.message || 'Ocorreu um erro inesperado. Tente recarregar a página.'}
           </p>
           <button
             onClick={() => window.location.reload()}

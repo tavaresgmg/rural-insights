@@ -3,6 +3,7 @@ import logging
 from typing import Dict, List, Optional, Any
 from datetime import datetime
 import asyncio
+import numpy as np
 from openai import AsyncOpenAI
 from pydantic import ValidationError
 
@@ -14,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 class AIAnalyzer:
     def __init__(self):
+        logger.info(f"Inicializando AI Analyzer com API key: {settings.openai_api_key[:20]}...")
         self.client = AsyncOpenAI(api_key=settings.openai_api_key)
         self.max_retries = 3
         self.timeout = 30  # seconds
@@ -65,19 +67,19 @@ class AIAnalyzer:
         # Calcula médias e tendências
         context = {
             "resumo_financeiro": {
-                "total_gasto": total_gasto,
-                "numero_transacoes": num_transacoes,
-                "media_por_transacao": total_gasto / num_transacoes if num_transacoes > 0 else 0,
+                "total_gasto": float(total_gasto),
+                "numero_transacoes": int(num_transacoes),
+                "media_por_transacao": float(total_gasto / num_transacoes) if num_transacoes > 0 else 0,
                 "periodo": periodo
             },
             "top_categorias": [
                 {
                     "nome": cat.nome,
-                    "valor": cat.valor,
-                    "percentual": cat.percentual,
-                    "variacao_mensal": cat.variacao_mensal,
-                    "transacoes": cat.transacoes,
-                    "media": cat.media_por_transacao
+                    "valor": float(cat.valor),
+                    "percentual": float(cat.percentual),
+                    "variacao_mensal": float(cat.variacao_mensal) if cat.variacao_mensal else None,
+                    "transacoes": int(cat.transacoes),
+                    "media": float(cat.media_por_transacao)
                 }
                 for cat in top_categories
             ],
@@ -106,9 +108,10 @@ class AIAnalyzer:
         user_prompt = self._get_user_prompt(context)
         
         try:
+            logger.info("Chamando OpenAI API com modelo gpt-4o-mini")
             response = await asyncio.wait_for(
                 self.client.chat.completions.create(
-                    model="gpt-4-turbo-preview",
+                    model="gpt-4o-mini",
                     messages=[
                         {"role": "system", "content": system_prompt},
                         {"role": "user", "content": user_prompt}
@@ -122,6 +125,7 @@ class AIAnalyzer:
             
             # Parse response
             content = response.choices[0].message.content
+            logger.info("Resposta recebida da OpenAI com sucesso")
             insights = json.loads(content)
             
             # Valida estrutura

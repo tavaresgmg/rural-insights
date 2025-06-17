@@ -21,4 +21,3 @@ COPY . .
 EXPOSE 8000
 
 # Command is specified in docker-compose.yml for flexibility
-EOF < /dev/null

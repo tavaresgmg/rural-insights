@@ -88,8 +88,9 @@ class CSVProcessor:
         
         # Enriquecer com insights de IA
         try:
+            logger.info("Tentando obter insights de IA...")
             ai_insights = await self.ai_analyzer.analyze_financial_data(
-                top_categorias=top_categorias,
+                top_categories=top_categorias,
                 total_gasto=total_gasto,
                 num_transacoes=num_transacoes,
                 periodo=periodo,

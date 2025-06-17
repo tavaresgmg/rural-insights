@@ -64,7 +64,7 @@ export const useOffline = () => {
       
       setState(prev => ({ 
         ...prev, 
-        isInstalled: isStandalone || isInWebApp || false
+        isInstalled: !!(isStandalone || isInWebApp)
       }));
     };
 

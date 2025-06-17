@@ -35,6 +35,7 @@ env/
 *.swp
 *.swo
 *~
+.serena/
 
 # OS
 .DS_Store
@@ -75,6 +76,11 @@ backend/test_results/
 *.temp
 test-simple.html
 exemplo_transacoes_rurais.csv
+test_*.json
+analysis_*.json
+response.json
+final_test.json
+test_data.csv
 
 # Database
 *.db

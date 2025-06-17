@@ -150,11 +150,11 @@ ${scoreData?.recomendacoes?.slice(0, 2).map((rec: any) =>
         yPosition += 10;
 
         // Score principal com fundo colorido
-        const scoreColor = scoreData.score_total >= 80 ? [16, 185, 129] : 
+        const scoreColor: number[] = scoreData.score_total >= 80 ? [16, 185, 129] : 
                           scoreData.score_total >= 60 ? [245, 158, 11] : 
                           scoreData.score_total >= 40 ? [249, 115, 22] : [239, 68, 68];
         
-        pdf.setFillColor(...scoreColor);
+        pdf.setFillColor(scoreColor[0], scoreColor[1], scoreColor[2]);
         pdf.roundedRect(20, yPosition - 5, 50, 15, 3, 3, 'F');
         
         pdf.setTextColor(255, 255, 255);
@@ -243,7 +243,7 @@ ${scoreData?.recomendacoes?.slice(0, 2).map((rec: any) =>
         pdf.setFont('helvetica', 'normal');
 
         const topAlerts = analysis.alertas.slice(0, 3);
-        topAlerts.forEach((alert: any, index: number) => {
+        topAlerts.forEach((alert: any) => {
           // Verifica se precisa de nova página
           if (yPosition > pageHeight - 40) {
             pdf.addPage();

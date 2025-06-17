@@ -1,0 +1,45 @@
+{
+  "score_total": 75.3,
+  "nivel": "Bom",
+  "componentes": {
+    "liquidez": {
+      "score": 60,
+      "peso": 30,
+      "status": "Adequado",
+      "valor_atual": 9929.6875,
+      "meses_cobertura": 2.6
+    },
+    "endividamento": {
+      "score": 100,
+      "peso": 30,
+      "status": "Forte",
+      "percentual_receita": 0.9,
+      "valor_dividas": 2000.0
+    },
+    "eficiencia": {
+      "score": 68.2,
+      "peso": 40,
+      "status": "Adequado",
+      "roi_estimado": 400.0
+    }
+  },
+  "benchmark": {
+    "posicao_regional": "Top 25% da região",
+    "cultura_detectada": "geral",
+    "ajuste_sazonal": 0.0
+  },
+  "recomendacoes": [
+    {
+      "categoria": "Gestão",
+      "prioridade": "baixa",
+      "acao": "Manter controle financeiro detalhado e revisar score mensalmente",
+      "impacto_score": "+5 pontos",
+      "prazo": "Contínuo"
+    }
+  ],
+  "tendencia": {
+    "direcao": "melhorando",
+    "variacao": 13.3
+  },
+  "proxima_revisao": "16/07/2025"
+}
